@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(curl -s http://localhost:5173/)",
+      "Bash(npx playwright *)",
+      "Bash(cd /tmp)",
+      "Bash(node -e ' *)",
+      "Bash(node verify.mjs)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\tiago\\\\OneDrive\\\\Documentos\\\\Projetos\\\\Auxiliar-Pizzaria\" -Recurse)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(Select-Object -First 100)",
+      "PowerShell(ls -R \"c:\\\\Users\\\\tiago\\\\OneDrive\\\\Documentos\\\\Projetos\\\\Auxiliar-Pizzaria\")",
+      "PowerShell(head -100)"
+    ]
+  }
+}
