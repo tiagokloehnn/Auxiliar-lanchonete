@@ -1,4 +1,5 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 interface Props {
   totalAtivas: number
@@ -8,6 +9,13 @@ interface Props {
 
 export function Header({ totalAtivas, totalExpiradas, onNovaComanda }: Props) {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { profile, isAdmin, signOut } = useAuth()
+
+  async function handleLogout() {
+    await signOut()
+    navigate('/login')
+  }
 
   return (
     <header className="bg-slate-900/95 border-b border-slate-700 backdrop-blur-sm sticky top-0 z-30">
@@ -32,12 +40,26 @@ export function Header({ totalAtivas, totalExpiradas, onNovaComanda }: Props) {
             </div>
           </div>
 
-          <button
-            onClick={onNovaComanda}
-            className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors active:scale-95"
-          >
-            + Nova
-          </button>
+          <div className="flex items-center gap-2">
+            {profile && (
+              <span className="text-xs text-slate-500 hidden sm:block truncate max-w-[100px]">
+                {profile.nome}
+              </span>
+            )}
+            <button
+              onClick={onNovaComanda}
+              className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors active:scale-95"
+            >
+              + Nova
+            </button>
+            <button
+              onClick={handleLogout}
+              title="Sair"
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-3 py-2 rounded-xl text-sm transition-colors"
+            >
+              Sair
+            </button>
+          </div>
         </div>
 
         {/* Nav */}
@@ -72,6 +94,18 @@ export function Header({ totalAtivas, totalExpiradas, onNovaComanda }: Props) {
           >
             Histórico
           </Link>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className={`flex-1 text-center py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                location.pathname === '/admin'
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Admin
+            </Link>
+          )}
         </nav>
       </div>
     </header>

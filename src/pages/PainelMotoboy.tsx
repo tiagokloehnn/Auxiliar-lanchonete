@@ -28,7 +28,11 @@ export function PainelMotoboy() {
       return () => { supabase.removeChannel(canal); if (intervalRef.current) clearInterval(intervalRef.current) }
     } else {
       const unsub = rastreamentoLocal.onChange(() => carregarPendentes(paradasRef.current))
-      return () => { unsub(); if (intervalRef.current) clearInterval(intervalRef.current) }
+      function handleStorage(e: StorageEvent) {
+        if (e.key === 'pizzaria_rastreamento') carregarPendentes(paradasRef.current)
+      }
+      window.addEventListener('storage', handleStorage)
+      return () => { unsub(); window.removeEventListener('storage', handleStorage); if (intervalRef.current) clearInterval(intervalRef.current) }
     }
   }, [])
 

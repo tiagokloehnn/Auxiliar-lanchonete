@@ -51,7 +51,7 @@ export function NovaComandaModal({ onSalvar, onFechar }: Props) {
     setItens(prev => prev.map(i => i.id === id ? { ...i, ...campo } : i))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setErro('')
 

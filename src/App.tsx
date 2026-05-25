@@ -3,11 +3,15 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Header } from './components/Header'
 import { NovaComandaModal } from './components/NovaComandaModal'
 import { ToastContainer } from './components/ToastContainer'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import { AuthProvider } from './contexts/AuthContext'
 import { Dashboard } from './pages/Dashboard'
 import { Historico } from './pages/Historico'
 import { Rastreamento } from './pages/Rastreamento'
 import { Motoboy } from './pages/Motoboy'
 import { PainelMotoboy } from './pages/PainelMotoboy'
+import { Login } from './pages/Login'
+import { Admin } from './pages/Admin'
 import { useComandas, calcularAlerta } from './hooks/useComandas'
 import { useToasts } from './hooks/useToasts'
 import type { Comanda } from './types'
@@ -55,6 +59,11 @@ function MainApp() {
           <Route path="/" element={<Dashboard ativas={ativas} onFinalizar={handleFinalizar} onCancelar={handleCancelar} onAlerta={handleAlerta} onNovaComanda={() => setModalAberto(true)} />} />
           <Route path="/rastreamento" element={<Rastreamento filaEntrega={filaEntrega} onConfirmarEntrega={confirmarEntregaRealizada} />} />
           <Route path="/historico" element={<Historico historico={historico} onExcluir={excluirComanda} onLimpar={limparHistorico} />} />
+          <Route path="/admin" element={
+            <ProtectedRoute adminOnly>
+              <Admin />
+            </ProtectedRoute>
+          } />
         </Routes>
       </main>
       {modalAberto && <NovaComandaModal onSalvar={handleCriarComanda} onFechar={() => setModalAberto(false)} />}
@@ -66,11 +75,18 @@ function MainApp() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/motoboy/:numero" element={<Motoboy />} />
-        <Route path="/painel-motoboy" element={<PainelMotoboy />} />
-        <Route path="/*" element={<MainApp />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/motoboy/:numero" element={<Motoboy />} />
+          <Route path="/painel-motoboy" element={<PainelMotoboy />} />
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <MainApp />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

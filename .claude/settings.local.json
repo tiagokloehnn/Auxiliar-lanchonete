@@ -16,7 +16,11 @@
       "Bash(Sort-Object FullName)",
       "Bash(Select-Object -First 100)",
       "PowerShell(ls -R \"c:\\\\Users\\\\tiago\\\\OneDrive\\\\Documentos\\\\Projetos\\\\Auxiliar-Pizzaria\")",
-      "PowerShell(head -100)"
+      "PowerShell(head -100)",
+      "Bash(Get-ChildItem -Recurse -Depth 2)",
+      "Bash(Select-Object -Property FullName, PSIsContainer)",
+      "Bash(cd \"/c/Users/tiago/OneDrive/Documentos/Projetos/Auxiliar-Pizzaria\" && find . -type f -name \"*.json\" -o -type f -name \"*.tsx\" -o -type f -name \"*.ts\" | head -30)",
+      "Read(//c/c/Users/tiago/OneDrive/Documentos/Projetos/**)"
     ]
   }
 }

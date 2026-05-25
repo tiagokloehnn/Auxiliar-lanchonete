@@ -90,7 +90,7 @@ function LinkMotoboy() {
       </div>
 
       {qrAberto && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6" onClick={() => setQrAberto(false)}>
+        <div className="fixed inset-0 bg-black/80 z-[1001] flex items-center justify-center p-6" onClick={() => setQrAberto(false)}>
           <div className="bg-white rounded-3xl p-6 max-w-xs w-full text-center shadow-2xl" onClick={e => e.stopPropagation()}>
             <p className="text-slate-800 font-black text-base mb-1">Painel do Motoboy</p>
             <p className="text-slate-500 text-xs mb-4">Motoboy escaneia uma vez e bookmarks a página</p>
@@ -108,25 +108,10 @@ function LinkMotoboy() {
 
 function FilaCard({ comanda, onConfirmar }: { comanda: Comanda; onConfirmar: () => void }) {
   const [qrAberto, setQrAberto] = useState(false)
-  const [qrCriando, setQrCriando] = useState(false)
   const [confirmando, setConfirmando] = useState(false)
   const motoUrl = `${window.location.origin}/motoboy/${comanda.numero}`
 
-  async function handleAbrirQr() {
-    setQrCriando(true)
-    const payload = {
-      comanda_numero: comanda.numero,
-      cliente: comanda.cliente,
-      endereco: comanda.enderecoEntrega ?? '',
-      status: 'aguardando' as const,
-      atualizado_em: new Date().toISOString(),
-    }
-    if (isSupabaseConfigured) {
-      await supabase.from('rastreamento_entrega').upsert(payload, { onConflict: 'comanda_numero' })
-    } else {
-      rastreamentoLocal.criar(payload)
-    }
-    setQrCriando(false)
+  function handleAbrirQr() {
     setQrAberto(true)
   }
 
@@ -160,10 +145,9 @@ function FilaCard({ comanda, onConfirmar }: { comanda: Comanda; onConfirmar: () 
       <div className="flex gap-2">
         <button
           onClick={handleAbrirQr}
-          disabled={qrCriando}
-          className="flex-1 py-2 rounded-lg text-sm font-semibold bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600/40 transition-colors disabled:opacity-50"
+          className="flex-1 py-2 rounded-lg text-sm font-semibold bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600/40 transition-colors"
         >
-          {qrCriando ? '...' : '📱 QR Code'}
+          📱 QR Code
         </button>
         <button
           onClick={handleConfirmar}
@@ -176,7 +160,7 @@ function FilaCard({ comanda, onConfirmar }: { comanda: Comanda; onConfirmar: () 
       </div>
 
       {qrAberto && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6" onClick={() => setQrAberto(false)}>
+        <div className="fixed inset-0 bg-black/80 z-[1001] flex items-center justify-center p-6" onClick={() => setQrAberto(false)}>
           <div className="bg-white rounded-3xl p-6 max-w-xs w-full text-center shadow-2xl" onClick={e => e.stopPropagation()}>
             <p className="text-slate-800 font-black text-base mb-1">QR Code — #{comanda.numero}</p>
             <p className="text-slate-500 text-xs mb-1 font-semibold">{comanda.cliente}</p>
@@ -277,7 +261,7 @@ export function Rastreamento({ filaEntrega, onConfirmarEntrega }: Props) {
         </div>
       ) : (
         <>
-          <div className="rounded-2xl overflow-hidden border border-slate-700" style={{ height: 320 }}>
+          <div className="rounded-2xl overflow-hidden border border-slate-700" style={{ height: 320, isolation: 'isolate' }}>
             <MapContainer center={[-23.55, -46.63]} zoom={12} style={{ height: '100%', width: '100%' }} zoomControl={true}>
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

@@ -1,6 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import db from '../db'
 import type { Comanda, Item, TipoAtendimento } from '../types'
+import { supabase, isSupabaseConfigured } from '../lib/supabase'
+import { rastreamentoLocal } from '../lib/rastreamentoLocal'
 
 export function useComandas() {
   const ativas = useLiveQuery(() =>
@@ -59,6 +61,21 @@ export function useComandas() {
       update.tempoExpiradoMins = Math.abs(Math.min(0, alerta.minutosRestantes))
     }
     await db.comandas.update(id, update)
+
+    if (comanda.tipoAtendimento === 'entrega') {
+      const payload = {
+        comanda_numero: comanda.numero,
+        cliente: comanda.cliente,
+        endereco: comanda.enderecoEntrega ?? '',
+        status: 'aguardando' as const,
+        atualizado_em: new Date().toISOString(),
+      }
+      if (isSupabaseConfigured) {
+        await supabase.from('rastreamento_entrega').upsert(payload, { onConflict: 'comanda_numero' })
+      } else {
+        rastreamentoLocal.criar(payload)
+      }
+    }
   }
 
   async function confirmarEntregaRealizada(id: number) {

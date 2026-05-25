@@ -69,7 +69,7 @@ export function Motoboy() {
 
     const novasParadas = jaExiste
       ? existentes.map(p => p.numero === numero ? { ...p, status: statusNormalizado(entregaAtual!.status) } : p)
-      : [...existentes, { numero: entregaAtual.comanda_numero, cliente: entregaAtual.cliente, endereco: entregaAtual.endereco ?? '', status: statusNormalizado(entregaAtual.status) }]
+      : [...existentes, { numero: entregaAtual!.comanda_numero, cliente: entregaAtual!.cliente, endereco: entregaAtual!.endereco ?? '', status: statusNormalizado(entregaAtual!.status) }]
 
     gravarParadas(novasParadas)
     setParadas(novasParadas)
