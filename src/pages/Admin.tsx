@@ -152,11 +152,23 @@ function ModalNovoUsuario({ onFechar, onSalvo }: ModalNovoUsuarioProps) {
     setErro('')
     setCarregando(true)
 
+    // Salva sessão do admin antes do signUp, pois se confirmação de email estiver
+    // desativada o Supabase faz login automático como o novo usuário
+    const { data: { session: sessaoAdmin } } = await supabase.auth.getSession()
+
     const { error } = await supabase.auth.signUp({
       email,
       password: senha,
       options: { data: { nome, role } },
     })
+
+    // Restaura sessão do admin independente do resultado
+    if (sessaoAdmin) {
+      await supabase.auth.setSession({
+        access_token: sessaoAdmin.access_token,
+        refresh_token: sessaoAdmin.refresh_token,
+      })
+    }
 
     setCarregando(false)
     if (error) { setErro(error.message); return }
