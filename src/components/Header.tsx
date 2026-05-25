@@ -10,7 +10,7 @@ interface Props {
 export function Header({ totalAtivas, totalExpiradas, onNovaComanda }: Props) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { profile, isAdmin, signOut } = useAuth()
+  const { profile, isAdmin, isMotoboy, signOut } = useAuth()
 
   async function handleLogout() {
     await signOut()
@@ -46,12 +46,14 @@ export function Header({ totalAtivas, totalExpiradas, onNovaComanda }: Props) {
                 {profile.nome}
               </span>
             )}
-            <button
-              onClick={onNovaComanda}
-              className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors active:scale-95"
-            >
-              + Nova
-            </button>
+            {!isMotoboy && (
+              <button
+                onClick={onNovaComanda}
+                className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-xl text-sm transition-colors active:scale-95"
+              >
+                + Nova
+              </button>
+            )}
             <button
               onClick={handleLogout}
               title="Sair"
@@ -64,16 +66,18 @@ export function Header({ totalAtivas, totalExpiradas, onNovaComanda }: Props) {
 
         {/* Nav */}
         <nav className="flex gap-1 mt-3">
-          <Link
-            to="/"
-            className={`flex-1 text-center py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-              location.pathname === '/'
-                ? 'bg-slate-700 text-white'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Painel
-          </Link>
+          {!isMotoboy && (
+            <Link
+              to="/"
+              className={`flex-1 text-center py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                location.pathname === '/'
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Painel
+            </Link>
+          )}
           <Link
             to="/rastreamento"
             className={`flex-1 text-center py-1.5 rounded-lg text-sm font-semibold transition-colors ${
@@ -84,16 +88,18 @@ export function Header({ totalAtivas, totalExpiradas, onNovaComanda }: Props) {
           >
             🛵 Entregas
           </Link>
-          <Link
-            to="/historico"
-            className={`flex-1 text-center py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-              location.pathname === '/historico'
-                ? 'bg-slate-700 text-white'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Histórico
-          </Link>
+          {!isMotoboy && (
+            <Link
+              to="/historico"
+              className={`flex-1 text-center py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                location.pathname === '/historico'
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Histórico
+            </Link>
+          )}
           {isAdmin && (
             <Link
               to="/admin"

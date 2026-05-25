@@ -5,7 +5,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase'
 export interface Profile {
   id: string
   nome: string
-  role: 'admin' | 'funcionario'
+  role: 'admin' | 'funcionario' | 'motoboy'
   ativo: boolean
   created_at: string
 }
@@ -16,6 +16,7 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   isAdmin: boolean
+  isMotoboy: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
@@ -24,11 +25,10 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 async function fetchProfile(userId: string): Promise<Profile | null> {
   try {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    const { data } = await Promise.race([
+      supabase.from('profiles').select('*').eq('id', userId).single(),
+      new Promise<{ data: null }>((resolve) => setTimeout(() => resolve({ data: null }), 3000)),
+    ])
     return data as Profile | null
   } catch {
     return null
@@ -47,28 +47,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        setProfile(await fetchProfile(session.user.id))
-      }
-      setLoading(false)
-    }).catch(() => {
-      setLoading(false)
-    })
+    // Garante que loading nunca trava para sempre (rede lenta, Supabase fora, etc.)
+    const fallback = setTimeout(() => setLoading(false), 3000)
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        setProfile(await fetchProfile(session.user.id))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'INITIAL_SESSION') {
+        // Libera a tela imediatamente sem esperar o perfil carregar
+        setSession(session)
+        setUser(session?.user ?? null)
+        clearTimeout(fallback)
+        setLoading(false)
+        if (session?.user) {
+          setProfile(await fetchProfile(session.user.id))
+        }
       } else {
-        setProfile(null)
+        setSession(session)
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          setProfile(await fetchProfile(session.user.id))
+        } else {
+          setProfile(null)
+        }
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(fallback)
+    }
   }, [])
 
   async function signIn(email: string, password: string): Promise<{ error: string | null }> {
@@ -97,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       loading,
       isAdmin: profile?.role === 'admin',
+      isMotoboy: profile?.role === 'motoboy',
       signIn,
       signOut,
     }}>

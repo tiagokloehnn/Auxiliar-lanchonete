@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 interface Props {
@@ -6,8 +6,11 @@ interface Props {
   adminOnly?: boolean
 }
 
+const ROTAS_MOTOBOY = ['/rastreamento']
+
 export function ProtectedRoute({ children, adminOnly = false }: Props) {
   const { user, profile, loading } = useAuth()
+  const location = useLocation()
 
   if (loading) {
     return (
@@ -19,6 +22,11 @@ export function ProtectedRoute({ children, adminOnly = false }: Props) {
 
   if (!user) return <Navigate to="/login" replace />
   if (adminOnly && profile?.role !== 'admin') return <Navigate to="/" replace />
+
+  // Motoboy só acessa /rastreamento
+  if (profile?.role === 'motoboy' && !ROTAS_MOTOBOY.includes(location.pathname)) {
+    return <Navigate to="/rastreamento" replace />
+  }
 
   return <>{children}</>
 }

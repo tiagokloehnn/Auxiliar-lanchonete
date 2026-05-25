@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import QRCode from 'react-qr-code'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
@@ -186,12 +186,25 @@ export function Rastreamento({ filaEntrega, onConfirmarEntrega }: Props) {
   const [entregas, setEntregas] = useState<EntregaRastreada[]>([])
   const [carregando, setCarregando] = useState(true)
 
+  // Refs para sempre ter valores atuais dentro do callback do realtime
+  const filaRef = useRef(filaEntrega)
+  const confirmarRef = useRef(onConfirmarEntrega)
+  useEffect(() => { filaRef.current = filaEntrega }, [filaEntrega])
+  useEffect(() => { confirmarRef.current = onConfirmarEntrega }, [onConfirmarEntrega])
+
   useEffect(() => {
     if (isSupabaseConfigured) {
       carregarSupabase()
       const canal = supabase
         .channel('rastreamento_entrega')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'rastreamento_entrega' }, carregarSupabase)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rastreamento_entrega' }, (payload) => {
+          if (payload.new.status === 'entregue') {
+            const comanda = filaRef.current.find(c => c.numero === payload.new.comanda_numero)
+            if (comanda?.id) confirmarRef.current(comanda.id)
+          }
+          carregarSupabase()
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rastreamento_entrega' }, carregarSupabase)
         .subscribe()
       return () => { supabase.removeChannel(canal) }
     } else {

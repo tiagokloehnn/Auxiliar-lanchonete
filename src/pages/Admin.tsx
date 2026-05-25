@@ -74,7 +74,7 @@ function AbaUsuarios() {
     setUsuarios(prev => prev.map(p => p.id === u.id ? { ...p, ativo: !p.ativo } : p))
   }
 
-  async function alterarRole(u: Profile, role: 'admin' | 'funcionario') {
+  async function alterarRole(u: Profile, role: 'admin' | 'funcionario' | 'motoboy') {
     await supabase.from('profiles').update({ role }).eq('id', u.id)
     setUsuarios(prev => prev.map(p => p.id === u.id ? { ...p, role } : p))
   }
@@ -106,10 +106,11 @@ function AbaUsuarios() {
 
               <select
                 value={u.role}
-                onChange={e => alterarRole(u, e.target.value as 'admin' | 'funcionario')}
+                onChange={e => alterarRole(u, e.target.value as 'admin' | 'funcionario' | 'motoboy')}
                 className="bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded-lg px-2 py-1 focus:outline-none"
               >
                 <option value="funcionario">Funcionário</option>
+                <option value="motoboy">Motoboy</option>
                 <option value="admin">Admin</option>
               </select>
 
